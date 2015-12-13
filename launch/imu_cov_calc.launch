@@ -1,0 +1,8 @@
+<launch>
+  <node pkg="ros_imu_covariance_calculator" type="imu_cov_calc_node" name="imu_cov_calc_node" output="screen"> 
+     
+     <!-- Total number of IMU samples to be acquired -->
+     <param name="data_count" value="100"/>
+   </node>   
+</launch>
+

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package>
+  <name>ros_imu_covariance_calculator</name>
+  <version>0.1.0</version>
+  <description>ROS Package to estimate the variance of the inertial data from an IMU
+               to be used to populate the error covariance matrix</description>
+
+  <author email="myzhar@robot-home.it">Walter 'Myzhar' Lucetti</author>
+
+  <maintainer email="myzhar@robot-home.it">Walter 'Myzhar' Lucetti</maintainer>
+
+  <license>LGPL3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+
+  <run_depend>std_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+</package>
