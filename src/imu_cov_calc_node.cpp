@@ -14,7 +14,7 @@ bool stop = false;
 int imu_data_count = 0;
 
 // Parameters
-int data_count=1000;
+int data_count = 1000;
 
 //Data Statistics
 vector<double> vec_acc_x;
@@ -31,12 +31,6 @@ vector<double> vec_quat_y;
 vector<double> vec_quat_z;
 // <<<<< Globals
 
-// >>>>> Functions
-void load_params(ros::NodeHandle& nh);
-void processImuData( const sensor_msgs::Imu::ConstPtr& imu );
-double calcVariance( vector<double>& data );
-// <<<<< Functions
-
 // >>>>> Ctrl+C handler
 /*! Ctrl+C handler
  */
@@ -46,6 +40,20 @@ static void sighandler(int signo)
     stop = true;
 }
 // <<<<< Ctrl+C handler
+
+// >>>>> Structs
+typedef struct _dataStat
+{
+    double mean;
+    double var;
+} DataStat;
+// <<<<< Structs
+
+// >>>>> Functions
+void load_params(ros::NodeHandle& nh);
+void processImuData( const sensor_msgs::Imu::ConstPtr& imu );
+DataStat calcStats( vector<double>& data );
+// <<<<< Functions
 
 int main(int argc, char** argv)
 {
@@ -113,36 +121,36 @@ int main(int argc, char** argv)
     ROS_INFO_STREAM( "************************" );
     cout << endl;
 
-    double var_acc_x = calcVariance(vec_acc_x);
-    double var_acc_y = calcVariance(vec_acc_y);
-    double var_acc_z = calcVariance(vec_acc_z);
+    DataStat stat_acc_x = calcStats(vec_acc_x);
+    DataStat stat_acc_y = calcStats(vec_acc_y);
+    DataStat stat_acc_z = calcStats(vec_acc_z);
 
-    double var_ang_x = calcVariance(vec_ang_x);
-    double var_ang_y = calcVariance(vec_ang_y);
-    double var_ang_z = calcVariance(vec_ang_z);
+    DataStat stat_ang_x = calcStats(vec_ang_x);
+    DataStat stat_ang_y = calcStats(vec_ang_y);
+    DataStat stat_ang_z = calcStats(vec_ang_z);
 
-    double var_quat_w = calcVariance(vec_quat_w);
-    double var_quat_x = calcVariance(vec_quat_x);
-    double var_quat_y = calcVariance(vec_quat_y);
-    double var_quat_z = calcVariance(vec_quat_z);
+    DataStat stat_quat_w = calcStats(vec_quat_w);
+    DataStat stat_quat_x = calcStats(vec_quat_x);
+    DataStat stat_quat_y = calcStats(vec_quat_y);
+    DataStat stat_quat_z = calcStats(vec_quat_z);
 
-    ROS_INFO_STREAM( "Linear acceleration:");
-    ROS_INFO_STREAM( " * X: "<< var_acc_x);
-    ROS_INFO_STREAM( " * Y: "<< var_acc_y);
-    ROS_INFO_STREAM( " * Z: "<< var_acc_z);
+    ROS_INFO_STREAM( "Linear acceleration: ( mean, var )");
+    ROS_INFO_STREAM( " * X: ( "<< stat_acc_x.mean << " , " << stat_acc_x.var << " )" );
+    ROS_INFO_STREAM( " * Y: ( "<< stat_acc_y.mean << " , " << stat_acc_y.var << " )" );
+    ROS_INFO_STREAM( " * Z: ( "<< stat_acc_z.mean << " , " << stat_acc_z.var << " )" );
     cout << endl;
 
-    ROS_INFO_STREAM( "Angular velocity:");
-    ROS_INFO_STREAM( " * X: "<< var_ang_x);
-    ROS_INFO_STREAM( " * Y: "<< var_ang_y);
-    ROS_INFO_STREAM( " * Z: "<< var_ang_z);
+    ROS_INFO_STREAM( "Angular velocity: ( mean, var )");
+    ROS_INFO_STREAM( " * X: ( "<< stat_ang_x.mean << " , " << stat_ang_x.var << " )" );
+    ROS_INFO_STREAM( " * Y: ( "<< stat_ang_y.mean << " , " << stat_ang_y.var << " )" );
+    ROS_INFO_STREAM( " * Z: ( "<< stat_ang_z.mean << " , " << stat_ang_z.var << " )" );
     cout << endl;
 
-    ROS_INFO_STREAM( "Orientation:");
-    ROS_INFO_STREAM( " * W: "<< var_quat_w);
-    ROS_INFO_STREAM( " * X: "<< var_quat_x);
-    ROS_INFO_STREAM( " * Y: "<< var_quat_y);
-    ROS_INFO_STREAM( " * Z: "<< var_quat_z);
+    ROS_INFO_STREAM( "Orientation: ( mean, var )");
+    ROS_INFO_STREAM( " * X: ( "<< stat_quat_x.mean << " , " << stat_quat_x.var << " )" );
+    ROS_INFO_STREAM( " * Y: ( "<< stat_quat_y.mean << " , " << stat_quat_y.var << " )" );
+    ROS_INFO_STREAM( " * Z: ( "<< stat_quat_z.mean << " , " << stat_quat_z.var << " )" );
+    ROS_INFO_STREAM( " * W: ( "<< stat_quat_w.mean << " , " << stat_quat_w.var << " )" );
     cout << endl;
     // <<<<< Variance calculation
 
@@ -194,7 +202,7 @@ void processImuData( const sensor_msgs::Imu::ConstPtr& imu )
         stop = true;
 }
 
-double calcVariance( vector<double>& data )
+DataStat calcStats( vector<double>& data )
 {
     double sum = 0.0;
     size_t count = data.size();
@@ -222,6 +230,9 @@ double calcVariance( vector<double>& data )
     double sigma_sq = sum_sq/count;
 
     //ROS_INFO_STREAM( "Variance: " << sigma_sq );
+    DataStat reply;
+    reply.mean = mean;
+    reply.var = sigma_sq;
 
-    return sigma_sq;
+    return reply;
 }
